@@ -5,11 +5,31 @@ import { FormHelperText, Grid, InputLabel, TextField } from '@material-ui/core';
 import airport from "../../public/airports.json";
 import moment from 'moment';
 import { SetStateAction, useState } from 'react';
+import axios from 'axios';
+import { headers } from 'next/dist/client/components/headers';
 
 
 export default function Home() {
   function submit(){
     console.log(returnDate);
+    axios.post("http://localhost:3001/flights/search",{
+      currencyCode: currency,
+      originLocationCode: departureCode,
+      destinationLocationCode: arrivalCode,
+      departureDate: departureDate,
+      adults: adultCounts,
+      children: childrenCounts,
+      infants: infantCounts,
+      travelClass: travelClass,
+      returnDate: returnDate,
+    },{headers:{
+      "Access-Control-Allow-Origin": "*"
+    },
+  }).then((result)=>{
+      console.log("result",result);
+    }).catch((error)=>{
+      console.log("error",error)
+    })
   }
   const [currency, setSelectedCurrency] = useState('INR');
   const onCurrencyChange = (e: string) =>{
@@ -35,7 +55,7 @@ export default function Home() {
   const oninfantCountsChange = (e: number) =>{
     setInfantCounts(e);
   };
-  const [returnDate, setReturnDate] = useState(moment(Date.now()).format('YYYY-MM-DD'));
+  const [returnDate, setReturnDate] = useState("");
   const onReturnDateChange = (e: SetStateAction<string>) =>{
     console.log(e);
     setReturnDate(e);
@@ -63,7 +83,6 @@ for (let val in airport){
 /*   tempOption.push({value:airport[val]["IATA_code"],name:airport[val]["city_name"]}); */
   Airportoptions.push(<option value={airport[val]["IATA_code"]}>{airport[val]["city_name"]}({airport[val]["IATA_code"]})</option>);
 }
-console.log(Airportoptions);
   return (
     <main className={styles.main}>
       <div className={styles.description}>
@@ -113,13 +132,13 @@ console.log(Airportoptions);
       <Grid container spacing={8}>
       <Grid item xs={6}>
           <InputLabel htmlFor="my-input" style={{["color"]:"white"}}>Travelling From<sup>*</sup></InputLabel>
-          <select id="my-input" className={styles.input} value={departureCode}>
+          <select id="my-input" className={styles.input} value={departureCode} onChange={(e) => onDepartureCodeChange(e.target.value)}>
           {Airportoptions}
           </select>
       </Grid>
   <Grid item xs={6}>
   <InputLabel htmlFor="my-input" style={{["color"]:"white"}}>Travelling To<sup>*</sup></InputLabel>
-          <select id="my-input" className={styles.input} value={arrivalCode} >
+          <select id="my-input" className={styles.input} value={arrivalCode} onChange={(e) => onArrivalCodeChange(e.target.value)}>
           {Airportoptions}
           </select>
   </Grid>
@@ -136,7 +155,7 @@ console.log(Airportoptions);
   </Grid>
   <Grid item xs={3}>
           <InputLabel htmlFor="adult-count" style={{["color"]:"white"}} >Adults</InputLabel>
-          <select id="my-input" className={styles.input} value={adultCounts} >
+          <select id="my-input" className={styles.input} value={adultCounts} onChange={(e) => onAdultCountsChange(Number(e.target.value))}>
           {adultsCountOptions}
           </select>
           <FormHelperText style={{["color"]:"white"}} id="my-helper-text">minimum 1</FormHelperText>
@@ -144,21 +163,21 @@ console.log(Airportoptions);
   </Grid>
   <Grid item xs={3}>
           <InputLabel htmlFor="my-input" style={{["color"]:"white"}}>Children</InputLabel>
-          <select id="my-input" className={styles.input} value={childrenCounts} >
+          <select id="my-input" className={styles.input} value={childrenCounts} onChange={(e) => onChildrenCountsChange(Number(e.target.value))}>
           {childrenCountOptions}
           </select>
           <FormHelperText style={{["color"]:"white"}} id="my-helper-text">Children age between 2 and 12</FormHelperText>
   </Grid>
   <Grid item xs={3}>
           <InputLabel htmlFor="my-input" style={{["color"]:"white"}}>Infants</InputLabel>
-          <select id="my-input" className={styles.input} value={infantCounts} >
+          <select id="my-input" className={styles.input} value={infantCounts} onChange={(e) => oninfantCountsChange(Number(e.target.value))}>
           {childrenCountOptions}
           </select>
           <FormHelperText style={{["color"]:"white"}} id="my-helper-text">Below 2 Years</FormHelperText>
   </Grid>
   <Grid item xs={3}>
           <InputLabel htmlFor="my-input" style={{["color"]:"white"}} >Travel Class</InputLabel>
-          <select id="my-input" className={styles.input} value={travelClass} >
+          <select id="my-input" className={styles.input} value={travelClass} onChange={(e) => onTravelClassChange(e.target.value)}>
           <option value="" selected>ANY</option>
           <option value="ECONOMY">ECONOMY</option>
           <option value="PREMIUM_ECONOMY">PREMIUM ECONOMY</option>
